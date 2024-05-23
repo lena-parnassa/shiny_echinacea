@@ -34,7 +34,7 @@ ui <- fluidPage(
     ),
     mainPanel(
       fluidRow(
-        column(8, dataEditOutput("data_editor")),
+        column(8, dataTableOutput("data_editor")),
         column(4, uiOutput("infoBox"))
       )
     )
@@ -48,14 +48,14 @@ server <- function(input, output, session) {
   error_selected <- reactive(input$error_select)
   
   observe({
-    filtered_data <- rv$data %>%
+    filtered_data <- rv$data |>
       filter(
         (user_selected() == "All" | UserName %in% user_selected()),
         (site_selected() == "All" | siteName %in% site_selected()),
         (error_selected() == "None Selected" | error %in% error_selected())
       )
     
-    output$data_editor <- renderDataEdit({
+    output$data_editor <- renderDataTable({
       data_edit(filtered_data, options = list(editable = TRUE))
     })
   })
@@ -64,7 +64,7 @@ server <- function(input, output, session) {
     selected_row <- input$data_editor_rows_selected
     if (length(selected_row) > 0) {
       selected_demo_id <- rv$data$demo.id[selected_row]
-      error_info <- errorData %>% filter(demo.id == selected_demo_id)
+      error_info <- errorData |> filter(demo.id == selected_demo_id)
       if (nrow(error_info) > 0) {
         output$infoBox <- renderUI({
           wellPanel(
